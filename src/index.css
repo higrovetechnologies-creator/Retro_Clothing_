@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #08080a;
+  --color-charcoal: #121214;
+  --color-surface: #17171a;
+  --color-line: rgba(245, 243, 239, 0.09);
+  --color-line-strong: rgba(245, 243, 239, 0.18);
+  --color-bone: #f2efe8;
+  --color-mist: #a3a29c;
+  --color-silver: #c7c5bd;
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+
+/* film grain overlay */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glass {
+  background: rgba(23, 23, 26, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--color-line);
+}
+
+.glass-strong {
+  background: rgba(18, 18, 20, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-line-strong);
+}
+
+.text-gradient {
+  background: linear-gradient(180deg, #f2efe8 0%, #a3a29c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* Endless Reviews marquee. The complete review set is duplicated once,
+   and the single wrapper moves exactly one set-width for a seamless loop.
+   Holding/touching the area pauses it; releasing resumes automatically. */
+.reviews-auto-scroll {
+  --reviews-gap: 1rem;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.reviews-auto-scroll.is-paused {
+  cursor: grabbing;
+}
+
+.reviews-marquee {
+  gap: var(--reviews-gap);
+  animation: reviews-marquee 42s linear infinite;
+  animation-play-state: running;
+  will-change: transform;
+}
+
+.reviews-auto-scroll.is-paused .reviews-marquee,
+.reviews-auto-scroll:active .reviews-marquee {
+  animation-play-state: paused;
+}
+
+.reviews-set {
+  gap: var(--reviews-gap);
+}
+
+@keyframes reviews-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-50% - (var(--reviews-gap) / 2)), 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reviews-track {
+    animation: none;
+  }
+}
