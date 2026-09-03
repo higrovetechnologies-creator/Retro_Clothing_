@@ -1,11 +1,8 @@
 export function buildOrderMessage(product, size) {
 const productUrl = `${window.location.origin}/product/${product.slug}`;
 
-const waveEmoji = String.fromCodePoint(0x1F44B);
-const smileEmoji = String.fromCodePoint(0x1F60A);
-
 const lines = [
-`Hello Retro Clothing ${waveEmoji}`,
+"Hello Retro Clothing \uD83D\uDC4B",
 "",
 "I would like to order this product.",
 "",
@@ -17,25 +14,48 @@ const lines = [
 "Product Link:",
 productUrl,
 "",
-`Please confirm the availability. ${smileEmoji}`,
+"Please confirm the availability. \uD83D\uDE0A",
 ];
 
 return lines.join("\n");
 }
 
-export function whatsappOrderUrl(product, size, whatsapp) {
-const cleanWhatsapp = String(whatsapp).replace(/\D/g, "");
+export function whatsappOrderUrl(
+product,
+size,
+whatsapp
+) {
+const cleanWhatsapp = String(
+whatsapp || ""
+).replace(/\D/g, "");
 
-const message = buildOrderMessage(product, size);
-const encodedMessage = encodeURIComponent(message);
+const message = buildOrderMessage(
+product,
+size
+);
 
-return `https://wa.me/${cleanWhatsapp}?text=${encodedMessage}`;
+const encodedMessage =
+encodeURIComponent(message);
+
+return (
+`https://wa.me/${cleanWhatsapp}` +
+`?text=${encodedMessage}`
+);
 }
 
-export function whatsappGeneralUrl(whatsapp, message) {
-const cleanWhatsapp = String(whatsapp).replace(/\D/g, "");
+export function whatsappGeneralUrl(
+whatsapp,
+message
+) {
+const cleanWhatsapp = String(
+whatsapp || ""
+).replace(/\D/g, "");
 
-return `https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
-    message
-  )}`;
+const encodedMessage =
+encodeURIComponent(message);
+
+return (
+`https://wa.me/${cleanWhatsapp}` +
+`?text=${encodedMessage}`
+);
 }
