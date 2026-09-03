@@ -34,10 +34,13 @@ import {
 import ProductCard from "../components/common/ProductCard";
 import Seo from "../components/common/Seo";
 import { productRoute } from "../lib/seoRoutes";
+
 import {
   breadcrumbJsonLd,
   productJsonLd,
 } from "../lib/seoConfig";
+
+import { CATEGORY_SIZES } from "../lib/data";
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -58,6 +61,19 @@ export default function ProductDetail() {
   const [showSizePopup, setShowSizePopup] =
     useState(false);
 
+  /*
+   * Popup type:
+   *
+   * "size"
+   * -> User clicked Order without selecting size
+   *
+   * "out_of_stock"
+   * -> User clicked a size which
+   *    admin has not marked as available
+   */
+  const [popupType, setPopupType] =
+    useState("size");
+
   /* ============================================================
      RESET WHEN PRODUCT CHANGES
   ============================================================ */
@@ -68,6 +84,7 @@ export default function ProductDetail() {
     setActiveImage(0);
     setSize(null);
     setShowSizePopup(false);
+    setPopupType("size");
   }, [slug]);
 
   /* ============================================================
@@ -99,6 +116,32 @@ export default function ProductDetail() {
   const isInStock =
     product.stock_status !==
     "out_of_stock";
+
+  /* ============================================================
+     ALL SIZES
+     
+     Show every size belonging to the product category.
+     
+     Example:
+     Shirts -> M, L, XL
+     Pants  -> 28, 30, 32, 34, 36
+  ============================================================ */
+
+  const allSizes =
+    CATEGORY_SIZES[
+      product.category
+    ] || [];
+
+  /* ============================================================
+     AVAILABLE SIZES
+     
+     These are the sizes selected by Admin.
+  ============================================================ */
+
+  const availableSizes =
+    Array.isArray(product.sizes)
+      ? product.sizes
+      : [];
 
   /* ============================================================
      RELATED
@@ -134,7 +177,10 @@ export default function ProductDetail() {
 
     if (!size) {
       e.preventDefault();
+
+      setPopupType("size");
       setShowSizePopup(true);
+
       return;
     }
   };
@@ -144,6 +190,28 @@ export default function ProductDetail() {
   ============================================================ */
 
   const chooseSize = () => {
+    setShowSizePopup(false);
+
+    setTimeout(() => {
+      const sizeSection =
+        document.getElementById(
+          "product-size-selector"
+        );
+
+      if (sizeSection) {
+        sizeSection.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 100);
+  };
+
+  /* ============================================================
+     CHOOSE ANOTHER SIZE
+  ============================================================ */
+
+  const chooseAnotherSize = () => {
     setShowSizePopup(false);
 
     setTimeout(() => {
@@ -241,7 +309,9 @@ export default function ProductDetail() {
                     activeImage
                   ]
                 }
-                alt={`${product.name} – ${product.colour || ""} ${product.category}`.trim()}
+                alt={`${product.name} – ${
+                  product.colour || ""
+                } ${product.category}`.trim()}
                 className={`
                   h-full
                   w-full
@@ -259,7 +329,10 @@ export default function ProductDetail() {
             <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto">
 
               {product.images?.map(
-                (image, index) => (
+                (
+                  image,
+                  index
+                ) => (
                   <button
                     key={index}
                     type="button"
@@ -410,34 +483,80 @@ export default function ProductDetail() {
 
               </div>
 
+              {/* ==================================================
+                  ALL CATEGORY SIZES
+                  
+                  Every applicable size is displayed.
+                  
+                  Admin-selected sizes:
+                  -> selectable
+                  
+                  Admin-not-selected sizes:
+                  -> shown but unavailable
+                  -> clicking opens Out of Stock popup
+              ================================================== */}
+
               <div className="flex flex-wrap gap-2.5">
 
-                {product.sizes?.map(
-                  (item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      disabled={!isInStock}
-                      onClick={() => {
-                        if (!isInStock)
-                          return;
+                {allSizes.map(
+                  (item) => {
 
-                        setSize(item);
-                        setShowSizePopup(
-                          false
-                        );
-                      }}
-                      className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-all ${
-                        !isInStock
-                          ? "cursor-not-allowed border-line text-mist/30"
-                          : size === item
-                          ? "border-bone bg-bone text-ink"
-                          : "border-line-strong text-bone hover:bg-white/5"
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  )
+                    const isSizeAvailable =
+                      availableSizes.includes(
+                        item
+                      );
+
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        disabled={!isInStock}
+                        onClick={() => {
+
+                          if (!isInStock)
+                            return;
+
+                          /*
+                           * Size exists for category,
+                           * but Admin did not enable it.
+                           */
+                          if (
+                            !isSizeAvailable
+                          ) {
+                            setPopupType(
+                              "out_of_stock"
+                            );
+
+                            setShowSizePopup(
+                              true
+                            );
+
+                            return;
+                          }
+
+                          /*
+                           * Available size
+                           */
+                          setSize(item);
+
+                          setShowSizePopup(
+                            false
+                          );
+                        }}
+                        className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-all ${
+                          !isInStock
+                            ? "cursor-not-allowed border-line text-mist/30"
+                            : !isSizeAvailable
+                            ? "border-line text-mist/40 hover:border-red-500/40 hover:bg-red-500/5"
+                            : size === item
+                            ? "border-bone bg-bone text-ink"
+                            : "border-line-strong text-bone hover:bg-white/5"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    );
+                  }
                 )}
 
               </div>
@@ -624,7 +743,7 @@ export default function ProductDetail() {
       </div>
 
       {/* ========================================================
-          SIZE POPUP
+          SIZE / OUT OF STOCK POPUP
       ======================================================== */}
 
       <AnimatePresence>
@@ -677,6 +796,8 @@ export default function ProductDetail() {
               className="relative w-full max-w-[390px] rounded-[24px] border border-white/10 bg-[#17171a] p-6 text-center shadow-2xl sm:p-7"
             >
 
+              {/* CLOSE */}
+
               <button
                 type="button"
                 onClick={() =>
@@ -687,26 +808,57 @@ export default function ProductDetail() {
                 <X size={17} />
               </button>
 
+              {/* ICON */}
+
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5">
                 <span className="text-xl">
-                  👕
+                  {popupType ===
+                  "out_of_stock"
+                    ? "❌"
+                    : "👕"}
                 </span>
               </div>
 
+              {/* TITLE */}
+
               <h3 className="mt-5 font-display text-2xl text-bone">
-                Select Your Size
+
+                {popupType ===
+                "out_of_stock"
+                  ? "Size Out of Stock"
+                  : "Select Your Size"}
+
               </h3>
 
+              {/* DESCRIPTION */}
+
               <p className="mx-auto mt-2 max-w-[290px] text-[13px] leading-relaxed text-mist">
-                Please select your size before placing the order.
+
+                {popupType ===
+                "out_of_stock"
+                  ? "This size is currently unavailable. Please choose another available size."
+                  : "Please select your size before placing the order."}
+
               </p>
+
+              {/* ACTION */}
 
               <button
                 type="button"
-                onClick={chooseSize}
+                onClick={
+                  popupType ===
+                  "out_of_stock"
+                    ? chooseAnotherSize
+                    : chooseSize
+                }
                 className="mt-6 w-full rounded-full bg-bone px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition-transform active:scale-[0.98]"
               >
-                Choose Size
+
+                {popupType ===
+                "out_of_stock"
+                  ? "Choose Another Size"
+                  : "Choose Size"}
+
               </button>
 
             </motion.div>
