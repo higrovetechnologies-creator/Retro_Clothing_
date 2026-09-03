@@ -2,7 +2,7 @@ export function buildOrderMessage(product, size) {
 const productUrl = `${window.location.origin}/product/${product.slug}`;
 
 const lines = [
-"Hello Retro Clothing \uD83D\uDC4B",
+"Hello Retro Clothing",
 "",
 "I would like to order this product.",
 "",
@@ -14,7 +14,7 @@ const lines = [
 "Product Link:",
 productUrl,
 "",
-"Please confirm the availability. \uD83D\uDE0A",
+"Please confirm the availability.",
 ];
 
 return lines.join("\n");
