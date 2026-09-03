@@ -259,13 +259,15 @@ export default function AdminProductForm() {
       });
 
       /*
-       * Show success popup
+       * SHOW SUCCESS POPUP
        */
+
       setShowSuccess(true);
 
       /*
-       * Redirect after popup
+       * REDIRECT AFTER POPUP
        */
+
       setTimeout(() => {
         navigate(
           "/admin/products"
@@ -295,9 +297,7 @@ export default function AdminProductForm() {
 
       <div className="mx-auto max-w-3xl">
 
-        {/* ======================================================
-            BACK
-        ====================================================== */}
+        {/* BACK */}
 
         <button
           type="button"
@@ -310,9 +310,7 @@ export default function AdminProductForm() {
           Back
         </button>
 
-        {/* ======================================================
-            TITLE
-        ====================================================== */}
+        {/* TITLE */}
 
         <h1 className="font-display text-3xl text-bone">
           {editing
@@ -326,18 +324,14 @@ export default function AdminProductForm() {
             : "Add a new product to your Retro Clothing collection."}
         </p>
 
-        {/* ======================================================
-            FORM
-        ====================================================== */}
+        {/* FORM */}
 
         <form
           onSubmit={onSubmit}
           className="mt-8 space-y-8"
         >
 
-          {/* ====================================================
-              BASIC INFORMATION
-          ==================================================== */}
+          {/* BASIC INFORMATION */}
 
           <FormSection
             title="Basic Information"
@@ -384,9 +378,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              PRICING
-          ==================================================== */}
+          {/* PRICING */}
 
           <FormSection
             title="Pricing"
@@ -428,9 +420,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              STOCK
-          ==================================================== */}
+          {/* STOCK STATUS */}
 
           <FormSection
             title="Stock Status"
@@ -541,9 +531,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              CATEGORY
-          ==================================================== */}
+          {/* CATEGORY */}
 
           <FormSection
             title="Category"
@@ -581,9 +569,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              SIZES
-          ==================================================== */}
+          {/* SIZES */}
 
           <FormSection
             title="Sizes"
@@ -627,15 +613,17 @@ export default function AdminProductForm() {
           </FormSection>
 
           {/* ====================================================
-              IMAGES
+              PRODUCT IMAGES
           ==================================================== */}
 
           <FormSection
             title="Product Images"
-            hint="Select images directly from your device."
+            hint="Select images directly from your device. Click the red X button to remove unwanted images."
           >
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-4">
+
+              {/* EXISTING / UPLOADED IMAGES */}
 
               {form.images.map(
                 (
@@ -644,16 +632,24 @@ export default function AdminProductForm() {
                 ) => (
                   <div
                     key={`${image}-${index}`}
-                    className="group relative h-24 w-20 overflow-hidden rounded-xl border border-line"
+                    className="relative h-24 w-20"
                   >
 
-                    <img
-                      src={image}
-                      alt={`Product ${
-                        index + 1
-                      }`}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {/* IMAGE */}
+
+                    <div className="h-full w-full overflow-hidden rounded-xl border border-line">
+
+                      <img
+                        src={image}
+                        alt={`Product ${
+                          index + 1
+                        }`}
+                        className="h-full w-full object-cover"
+                      />
+
+                    </div>
+
+                    {/* DELETE BUTTON */}
 
                     <button
                       type="button"
@@ -662,9 +658,16 @@ export default function AdminProductForm() {
                           index
                         )
                       }
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-bone opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-red-500 text-white shadow-lg transition-all hover:scale-110 hover:bg-red-600 active:scale-95"
+                      aria-label={`Delete image ${
+                        index + 1
+                      }`}
+                      title="Delete image"
                     >
-                      <X size={11} />
+                      <X
+                        size={14}
+                        strokeWidth={2.5}
+                      />
                     </button>
 
                   </div>
@@ -714,9 +717,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              OPTIONAL DETAILS
-          ==================================================== */}
+          {/* OPTIONAL DETAILS */}
 
           <FormSection
             title="Optional Details"
@@ -767,9 +768,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              CARE INSTRUCTIONS
-          ==================================================== */}
+          {/* CARE INSTRUCTIONS */}
 
           <FormSection
             title="Care Instructions"
@@ -792,9 +791,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              DISPLAY OPTIONS
-          ==================================================== */}
+          {/* DISPLAY OPTIONS */}
 
           <FormSection
             title="Display Options"
@@ -842,9 +839,7 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ====================================================
-              ACTION BUTTONS
-          ==================================================== */}
+          {/* ACTION BUTTONS */}
 
           <div className="flex gap-3 pt-2">
 
@@ -953,6 +948,7 @@ export default function AdminProductForm() {
 
         </div>
       )}
+
     </>
   );
 }
