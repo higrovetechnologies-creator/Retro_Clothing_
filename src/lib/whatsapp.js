@@ -1,28 +1,37 @@
-export function buildOrderMessage(product, size, whatsapp) {
+export function buildOrderMessage(product, size) {
   const productUrl = `${window.location.origin}/product/${product.slug}`;
+
   const lines = [
-    "Hello Retro Clothing 👋",
+    "Hello Retro Clothing \u{1F44B}",
     "",
     "I would like to order this product.",
     "",
     `Product: ${product.name}`,
-    `Product Code: ${product.product_code}`,
+    `Product Code: ${product.product_code || "N/A"}`,
     `Selected Size: ${size || "Not selected"}`,
-    `Price: ₹${product.now_price}`,
+    `Price: \u20B9${product.now_price}`,
     "",
     "Product Link:",
     productUrl,
     "",
-    "Please confirm the availability.",
+    "Please confirm the availability. \u{1F60A}",
   ];
+
   return lines.join("\n");
 }
 
 export function whatsappOrderUrl(product, size, whatsapp) {
-  const text = encodeURIComponent(buildOrderMessage(product, size, whatsapp));
-  return `https://wa.me/${whatsapp}?text=${text}`;
+  const cleanWhatsapp = String(whatsapp).replace(/\D/g, "");
+
+  return `https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
+    buildOrderMessage(product, size)
+  )}`;
 }
 
 export function whatsappGeneralUrl(whatsapp, message) {
-  return `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
+  const cleanWhatsapp = String(whatsapp).replace(/\D/g, "");
+
+  return `https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
+    message
+  )}`;
 }
