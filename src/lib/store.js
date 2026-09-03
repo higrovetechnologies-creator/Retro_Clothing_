@@ -19,7 +19,8 @@ const KEYS = {
   session: 'retro_admin_session',
 };
 
-const now = () => new Date().toISOString();
+const now = () =>
+  new Date().toISOString();
 
 const makeId = () =>
   `${Date.now()}-${Math.random()
@@ -27,17 +28,24 @@ const makeId = () =>
     .slice(2, 9)}`;
 
 const clone = (value) =>
-  JSON.parse(JSON.stringify(value));
+  JSON.parse(
+    JSON.stringify(value)
+  );
 
-const readJson = (key, fallback) => {
+const readJson = (
+  key,
+  fallback
+) => {
   try {
-    const raw = localStorage.getItem(key);
+    const raw =
+      localStorage.getItem(key);
 
     if (!raw) {
       return fallback;
     }
 
-    const parsed = JSON.parse(raw);
+    const parsed =
+      JSON.parse(raw);
 
     return parsed ?? fallback;
   } catch {
@@ -45,7 +53,10 @@ const readJson = (key, fallback) => {
   }
 };
 
-const writeJson = (key, value) =>
+const writeJson = (
+  key,
+  value
+) =>
   localStorage.setItem(
     key,
     JSON.stringify(value)
@@ -60,28 +71,37 @@ const notify = () =>
    PRODUCT HELPERS
 ========================================================= */
 
-const normalizeStockStatus = (value) =>
+const normalizeStockStatus = (
+  value
+) =>
   value === 'out_of_stock'
     ? 'out_of_stock'
     : 'in_stock';
 
-const normalizeProduct = (p) => ({
+const normalizeProduct = (
+  p = {}
+) => ({
   ...p,
 
-  id: p.id || makeId(),
+  id:
+    p.id ||
+    makeId(),
 
   name:
     p.name ||
     'Untitled Product',
 
   description:
-    p.description || '',
+    p.description ||
+    '',
 
   product_code:
-    p.product_code || '',
+    p.product_code ||
+    '',
 
   category:
-    p.category || 'shirts',
+    p.category ||
+    'shirts',
 
   images:
     Array.isArray(p.images)
@@ -97,13 +117,17 @@ const normalizeProduct = (p) => ({
     p.was_price === '' ||
     p.was_price == null
       ? null
-      : Number(p.was_price),
+      : Number(
+          p.was_price
+        ),
 
   now_price:
     p.now_price === '' ||
     p.now_price == null
       ? 0
-      : Number(p.now_price),
+      : Number(
+          p.now_price
+        ),
 
   stock_status:
     normalizeStockStatus(
@@ -111,13 +135,19 @@ const normalizeProduct = (p) => ({
     ),
 
   is_new_arrival:
-    Boolean(p.is_new_arrival),
+    Boolean(
+      p.is_new_arrival
+    ),
 
   is_offer:
-    Boolean(p.is_offer),
+    Boolean(
+      p.is_offer
+    ),
 
   is_featured:
-    Boolean(p.is_featured),
+    Boolean(
+      p.is_featured
+    ),
 
   created_at:
     p.created_at ||
@@ -134,7 +164,9 @@ const normalizeProduct = (p) => ({
    ANNOUNCEMENT HELPERS
 ========================================================= */
 
-const normalizeAnnouncement = (a) => ({
+const normalizeAnnouncement = (
+  a = {}
+) => ({
   ...a,
 
   id:
@@ -163,6 +195,7 @@ const normalizeAnnouncement = (a) => ({
     now(),
 
   updated_at:
+    a.updated_at ||
     now(),
 });
 
@@ -170,51 +203,98 @@ const normalizeAnnouncement = (a) => ({
    REVIEW HELPERS
 ========================================================= */
 
-const normalizeReview = (r) => ({
-  ...r,
+/*
+ * Supports BOTH:
+ *
+ * New fields:
+ *   name
+ *   text
+ *
+ * Old fields:
+ *   customer_name
+ *   review_text
+ *
+ * Supabase uses:
+ *   name
+ *   text
+ */
 
-  id:
-    r.id ||
-    makeId(),
+const normalizeReview = (
+  r = {}
+) => {
+  const name =
+    String(
+      r.name ??
+        r.customer_name ??
+        ''
+    ).trim() ||
+    'Anonymous';
 
-  customer_name:
-    r.customer_name?.trim() ||
-    'Anonymous',
+  const text =
+    String(
+      r.text ??
+        r.review_text ??
+        ''
+    ).trim();
 
-  review_text:
-    r.review_text?.trim() ||
-    '',
+  return {
+    ...r,
 
-  rating:
-    Math.min(
-      5,
-      Math.max(
-        1,
-        Number(r.rating) || 5
-      )
-    ),
+    id:
+      r.id ||
+      makeId(),
 
-  image_url:
-    r.image_url ||
-    '',
+    /* Supabase fields */
+    name,
 
-  is_featured:
-    Boolean(r.is_featured),
+    text,
 
-  created_at:
-    r.created_at ||
-    r.createdAt ||
-    now(),
+    /* Backward compatibility */
+    customer_name:
+      name,
 
-  updated_at:
-    now(),
-});
+    review_text:
+      text,
+
+    rating:
+      Math.min(
+        5,
+        Math.max(
+          1,
+          Number(
+            r.rating
+          ) || 5
+        )
+      ),
+
+    image_url:
+      r.image_url ||
+      '',
+
+    is_featured:
+      Boolean(
+        r.is_featured
+      ),
+
+    created_at:
+      r.created_at ||
+      r.createdAt ||
+      now(),
+
+    updated_at:
+      r.updated_at ||
+      now(),
+  };
+};
 
 /* =========================================================
    CACHE
 ========================================================= */
 
-function cache(key, value) {
+function cache(
+  key,
+  value
+) {
   writeJson(
     key,
     value
@@ -282,28 +362,14 @@ function makeSlug(
   );
 }
 
-/*
- * Generate a unique slug.
- *
- * Example:
- *
- * Classic Shirt
- * classic-shirt
- *
- * Classic Shirt
- * classic-shirt-2
- *
- * Classic Shirt
- * classic-shirt-3
- */
-
 function makeUniqueProductSlug(
   name,
   currentId
 ) {
   const baseSlug =
     makeSlug(
-      name || 'product'
+      name ||
+        'product'
     );
 
   const existingProducts =
@@ -324,9 +390,6 @@ function makeUniqueProductSlug(
         .filter(Boolean)
     );
 
-  /*
-   * Base slug available
-   */
   if (
     !usedSlugs.has(
       baseSlug
@@ -335,9 +398,6 @@ function makeUniqueProductSlug(
     return baseSlug;
   }
 
-  /*
-   * Base slug already exists
-   */
   let counter = 2;
 
   let slug =
@@ -370,21 +430,22 @@ function getAnnouncements() {
     const seeded =
       clone(
         ANNOUNCEMENTS
-      ).map((a, i) =>
-        normalizeAnnouncement({
-          ...a,
+      ).map(
+        (a, i) =>
+          normalizeAnnouncement({
+            ...a,
 
-          created_at:
-            a.created_at ||
-            new Date(
-              Date.now() -
-                (
-                  ANNOUNCEMENTS.length -
-                  i
-                ) *
-                  1000
-            ).toISOString(),
-        })
+            created_at:
+              a.created_at ||
+              new Date(
+                Date.now() -
+                  (
+                    ANNOUNCEMENTS.length -
+                    i
+                  ) *
+                    1000
+              ).toISOString(),
+          })
       );
 
     writeJson(
@@ -396,7 +457,9 @@ function getAnnouncements() {
   }
 
   return Array.isArray(stored)
-    ? stored
+    ? stored.map(
+        normalizeAnnouncement
+      )
     : [];
 }
 
@@ -434,12 +497,14 @@ function getSettings() {
 
     founder: {
       ...COMPANY_SETTINGS.founder,
-      ...(stored.founder || {}),
+      ...(stored.founder ||
+        {}),
     },
 
     cofounder: {
       ...COMPANY_SETTINGS.cofounder,
-      ...(stored.cofounder || {}),
+      ...(stored.cofounder ||
+        {}),
     },
   };
 }
@@ -512,7 +577,9 @@ function getSession() {
 const dataUrlToBlob =
   async (value) => {
     if (
-      !String(value).startsWith(
+      !String(
+        value
+      ).startsWith(
         'data:'
       )
     ) {
@@ -534,7 +601,9 @@ async function uploadDataUrl(
    * Already a normal URL
    */
   if (
-    !String(value).startsWith(
+    !String(
+      value
+    ).startsWith(
       'data:'
     ) ||
     !supabase
@@ -632,7 +701,10 @@ async function hydrateFromSupabase() {
             'company_settings'
           )
           .select('data')
-          .eq('id', 1)
+          .eq(
+            'id',
+            1
+          )
           .maybeSingle(),
 
         supabase
@@ -678,12 +750,13 @@ async function hydrateFromSupabase() {
       Array.isArray(
         announcements.data
       ) &&
-      announcements
-        .data.length
+      announcements.data.length
     ) {
       cache(
         KEYS.announcements,
-        announcements.data
+        announcements.data.map(
+          normalizeAnnouncement
+        )
       );
     }
 
@@ -709,12 +782,13 @@ async function hydrateFromSupabase() {
       !reviews.error &&
       Array.isArray(
         reviews.data
-      ) &&
-      reviews.data.length
+      )
     ) {
       cache(
         KEYS.reviews,
-        reviews.data
+        reviews.data.map(
+          normalizeReview
+        )
       );
     }
 
@@ -745,9 +819,6 @@ async function hydrateFromSupabase() {
 async function saveProduct(
   product
 ) {
-  /*
-   * Find existing product
-   */
   const existing =
     getProducts().find(
       (p) =>
@@ -755,33 +826,19 @@ async function saveProduct(
         product.id
     );
 
-  /*
-   * Keep existing ID while
-   * editing, otherwise create
-   * a new ID.
-   */
   const productId =
     product.id ||
     makeId();
 
-  /*
-   * Create normalized product
-   * with unique slug.
-   */
   const item =
     normalizeProduct({
       ...(existing || {}),
 
       ...product,
 
-      id: productId,
+      id:
+        productId,
 
-      /*
-       * IMPORTANT:
-       * Unique slug prevents
-       * products_slug_key
-       * duplicate errors.
-       */
       slug:
         makeUniqueProductSlug(
           product.name ||
@@ -798,16 +855,8 @@ async function saveProduct(
         now(),
     });
 
-  /* =======================================================
-     SUPABASE SAVE
-  ======================================================= */
-
   if (supabase) {
     try {
-      /*
-       * Upload all base64 images
-       * to Supabase Storage.
-       */
       const images =
         await Promise.all(
           (
@@ -826,9 +875,6 @@ async function saveProduct(
       item.images =
         images;
 
-      /*
-       * Database row
-       */
       const row = {
         ...item,
 
@@ -839,9 +885,6 @@ async function saveProduct(
           item.sizes,
       };
 
-      /*
-       * Insert / Update
-       */
       const {
         error,
       } =
@@ -869,10 +912,6 @@ async function saveProduct(
       throw error;
     }
   }
-
-  /* =======================================================
-     LOCAL CACHE
-  ======================================================= */
 
   const list =
     getProducts();
@@ -1067,22 +1106,51 @@ async function deleteAnnouncement(
 ========================================================= */
 
 async function saveReview(
-  review
+  review = {}
 ) {
-  if (
-    !review?.review_text
-  ) {
+  /*
+   * Accept both:
+   *
+   * name / text
+   *
+   * customer_name / review_text
+   */
+
+  const reviewName =
+    String(
+      review.name ??
+        review.customer_name ??
+        ''
+    ).trim() ||
+    'Anonymous';
+
+  const reviewText =
+    String(
+      review.text ??
+        review.review_text ??
+        ''
+    ).trim();
+
+  if (!reviewText) {
     throw new Error(
       'Review text is required.'
     );
   }
 
+  /*
+   * Find existing review
+   */
+
   const existing =
     getReviews().find(
       (r) =>
-        r.id ===
-        review.id
+        String(r.id) ===
+        String(review.id)
     );
+
+  /*
+   * Create normalized item
+   */
 
   const item =
     normalizeReview({
@@ -1092,45 +1160,185 @@ async function saveReview(
 
       id:
         review.id ||
+        existing?.id ||
         makeId(),
+
+      name:
+        reviewName,
+
+      text:
+        reviewText,
+
+      customer_name:
+        reviewName,
+
+      review_text:
+        reviewText,
+
+      rating:
+        Math.min(
+          5,
+          Math.max(
+            1,
+            Number(
+              review.rating
+            ) || 5
+          )
+        ),
+
+      image_url:
+        review.image_url ??
+        existing?.image_url ??
+        '',
+
+      is_featured:
+        Boolean(
+          review.is_featured
+        ),
 
       created_at:
         existing?.created_at ||
         review.created_at ||
         now(),
+
+      updated_at:
+        now(),
     });
 
+  console.log(
+    'Normalized review:',
+    item
+  );
+
+  /* =======================================================
+     SUPABASE SAVE
+  ======================================================= */
+
   if (supabase) {
-    if (
-      item.image_url
-    ) {
-      item.image_url =
-        await uploadDataUrl(
-          item.image_url,
-          'reviews',
-          item.id
-        );
-    }
+    try {
+      let imageUrl =
+        item.image_url ||
+        '';
 
-    const {
-      error,
-    } =
-      await supabase
-        .from(
-          'reviews'
+      /*
+       * Upload base64 image
+       */
+
+      if (
+        imageUrl &&
+        imageUrl.startsWith(
+          'data:'
         )
-        .upsert(
-          item,
-          {
-            onConflict:
-              'id',
-          }
+      ) {
+        imageUrl =
+          await uploadDataUrl(
+            imageUrl,
+            'reviews',
+            item.id
+          );
+      }
+
+      /*
+       * IMPORTANT
+       *
+       * Only send actual
+       * Supabase review columns.
+       *
+       * DB:
+       * id
+       * name
+       * text
+       * rating
+       * image_url
+       * is_featured
+       * created_at
+       */
+
+      const row = {
+        id:
+          item.id,
+
+        name:
+          item.name,
+
+        text:
+          item.text,
+
+        rating:
+          item.rating,
+
+        image_url:
+          imageUrl,
+
+        is_featured:
+          item.is_featured,
+
+        created_at:
+          item.created_at,
+      };
+
+      console.log(
+        'Supabase review row:',
+        row
+      );
+
+      const {
+        data,
+        error,
+      } =
+        await supabase
+          .from(
+            'reviews'
+          )
+          .upsert(
+            row,
+            {
+              onConflict:
+                'id',
+            }
+          )
+          .select()
+          .single();
+
+      if (error) {
+        console.error(
+          'Supabase review save error:',
+          error
         );
 
-    if (error) {
+        throw error;
+      }
+
+      /*
+       * Use Supabase returned data
+       */
+
+      if (data) {
+        Object.assign(
+          item,
+          normalizeReview(
+            data
+          )
+        );
+      }
+
+      console.log(
+        'Review saved to Supabase:',
+        item
+      );
+    } catch (error) {
+      console.error(
+        'Supabase review save failed:',
+        error
+      );
+
       throw error;
     }
   }
+
+  /* =======================================================
+     LOCAL CACHE
+  ======================================================= */
 
   const list =
     getReviews();
@@ -1138,8 +1346,8 @@ async function saveReview(
   const index =
     list.findIndex(
       (r) =>
-        r.id ===
-        item.id
+        String(r.id) ===
+        String(item.id)
     );
 
   if (index >= 0) {
@@ -1189,7 +1397,8 @@ async function deleteReview(
     KEYS.reviews,
     getReviews().filter(
       (r) =>
-        r.id !== id
+        String(r.id) !==
+        String(id)
     )
   );
 }
@@ -1211,12 +1420,14 @@ async function saveSettings(
 
     founder: {
       ...current.founder,
+
       ...(settings.founder ||
         {}),
     },
 
     cofounder: {
       ...current.cofounder,
+
       ...(settings.cofounder ||
         {}),
     },
@@ -1268,7 +1479,8 @@ async function saveSettings(
           {
             id: 1,
 
-            data: merged,
+            data:
+              merged,
 
             updated_at:
               now(),
@@ -1458,6 +1670,7 @@ async function signIn(
   if (error) {
     return {
       ok: false,
+
       error:
         error.message,
     };
@@ -1534,17 +1747,20 @@ if (
   /*
    * Load Supabase data
    */
+
   hydrateFromSupabase();
 
   /*
    * Load contact messages
    */
+
   hydrateMessages();
 
   /*
    * Listen for authentication
    * changes
    */
+
   if (supabase) {
     supabase.auth.onAuthStateChange(
       (
