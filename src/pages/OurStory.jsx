@@ -168,7 +168,7 @@ export default function OurStory() {
     },
     {
       ...(settings?.cofounder || {}),
-      role: "Founder & CEO",
+      role: "CEO",
     },
   ];
 

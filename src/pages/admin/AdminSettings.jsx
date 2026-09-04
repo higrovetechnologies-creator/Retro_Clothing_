@@ -254,7 +254,7 @@ export default function AdminSettings() {
             ================================================== */}
 
             <Field
-              label="Founder & CEO Name"
+              label="CEO Name"
               value={form.cofounder?.name}
               onChange={(v) =>
                 setNested(
@@ -266,7 +266,7 @@ export default function AdminSettings() {
             />
 
             <ImageUploadField
-              label="Founder & CEO Photo"
+              label="CEO Photo"
               value={form.cofounder?.image}
               uploading={uploadingCofounder}
               onUpload={async (file) => {
@@ -325,7 +325,7 @@ export default function AdminSettings() {
               <p className="text-sm text-bone">
                 {form.cofounder?.name || "Surya"}{" "}
                 <span className="text-mist">
-                  — Founder &amp; CEO
+                  — CEO
                 </span>
               </p>
 
