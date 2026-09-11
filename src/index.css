@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* =========================================================
+   RETRO CLOTHING FONTS
+   ========================================================= */
+
+/* Bolton Regular
+   HERO ONLY
+*/
+@font-face {
+  font-family: "Bolton";
+  src: url("/fonts/Bolton.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bolton Outline
+   HERO / SPECIAL DISPLAY ONLY
+*/
+@font-face {
+  font-family: "Bolton Outline";
+  src: url("/fonts/BoltonOutline.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bolton Titling Shadowed
+   HERO TITLE ONLY
+*/
+@font-face {
+  font-family: "Bolton Titling Shadowed";
+  src: url("/fonts/BoltonTitlingShadowed.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+@theme {
+  --color-ink: #08080a;
+  --color-charcoal: #121214;
+  --color-surface: #17171a;
+
+  --color-line: rgba(245, 243, 239, 0.09);
+  --color-line-strong: rgba(245, 243, 239, 0.18);
+
+  --color-bone: #f2efe8;
+  --color-mist: #a3a29c;
+  --color-silver: #c7c5bd;
+
+  /* =======================================================
+     EXISTING SITE FONTS
+     ======================================================= */
+
+  /* Existing display / heading font */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+
+  /* Existing body font */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+
+  background: var(--color-ink);
+  color: var(--color-bone);
+
+  /* EXISTING SITE FONT */
+  font-family: var(--font-sans);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+
+/* =========================================================
+   HERO-ONLY BOLTON UTILITIES
+   ========================================================= */
+
+/*
+  IMPORTANT:
+  These classes should be used ONLY inside Hero.jsx.
+*/
+
+/* Hero tagline */
+.font-bolton {
+  font-family: "Bolton", sans-serif !important;
+}
+
+/* Hero outline */
+.font-bolton-outline {
+  font-family: "Bolton Outline", sans-serif !important;
+}
+
+/* Hero main title */
+.font-bolton-shadowed {
+  font-family: "Bolton Titling Shadowed", sans-serif !important;
+}
+
+/* =========================================================
+   OPTIONAL EXISTING FONT UTILITIES
+   ========================================================= */
+
+/* Fraunces display font */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Inter body font */
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* =========================================================
+   FILM GRAIN OVERLAY
+   ========================================================= */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+
+  pointer-events: none;
+
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =========================================================
+   GLASS
+   ========================================================= */
+
+.glass {
+  background: rgba(23, 23, 26, 0.55);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid var(--color-line);
+}
+
+.glass-strong {
+  background: rgba(18, 18, 20, 0.72);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border: 1px solid var(--color-line-strong);
+}
+
+/* =========================================================
+   TEXT GRADIENT
+   ========================================================= */
+
+.text-gradient {
+  background: linear-gradient(
+    180deg,
+    #f2efe8 0%,
+    #a3a29c 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+/* =========================================================
+   NO SCROLLBAR
+   ========================================================= */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* =========================================================
+   ENDLESS REVIEWS MARQUEE
+   ========================================================= */
+
+.reviews-auto-scroll {
+  --reviews-gap: 1rem;
+
+  overflow: hidden;
+
+  cursor: grab;
+
+  user-select: none;
+
+  touch-action: pan-y;
+}
+
+.reviews-auto-scroll.is-paused {
+  cursor: grabbing;
+}
+
+.reviews-marquee {
+  gap: var(--reviews-gap);
+
+  animation: reviews-marquee 42s linear infinite;
+
+  animation-play-state: running;
+
+  will-change: transform;
+}
+
+.reviews-auto-scroll.is-paused .reviews-marquee,
+.reviews-auto-scroll:active .reviews-marquee {
+  animation-play-state: paused;
+}
+
+.reviews-set {
+  gap: var(--reviews-gap);
+}
+
+@keyframes reviews-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(
+      calc(-50% - (var(--reviews-gap) / 2)),
+      0,
+      0
+    );
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.01ms !important;
+
+    scroll-behavior: auto !important;
+  }
+
+  .reviews-track {
+    animation: none;
+  }
+}
