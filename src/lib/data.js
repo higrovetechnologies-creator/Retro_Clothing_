@@ -64,7 +64,9 @@ export const COMPANY_SETTINGS = {
 // ---------------------------------------------------------------------------
 // CATEGORIES
 //
-// Each category now uses its own separate image.
+// Combo is intentionally NOT added here.
+// Combo is a product category used by the product/admin system,
+// but it should not appear in the main visual Categories section.
 // ---------------------------------------------------------------------------
 
 export const CATEGORIES = [
@@ -90,14 +92,41 @@ export const CATEGORIES = [
 
 // ---------------------------------------------------------------------------
 // CATEGORY SIZES
+//
+// Combo contains both shirt and pant sizes.
+//
+// Shirt sizes:
+// M, L, XL
+//
+// Pant sizes:
+// 28, 30, 32, 34, 36
 // ---------------------------------------------------------------------------
 
 export const CATEGORY_SIZES = {
-  shirts: ["M", "L", "XL"],
+  shirts: [
+    "M",
+    "L",
+    "XL",
+  ],
 
-  tees: ["M", "L", "XL"],
+  tees: [
+    "M",
+    "L",
+    "XL",
+  ],
 
   pants: [
+    "28",
+    "30",
+    "32",
+    "34",
+    "36",
+  ],
+
+  combo: [
+    "M",
+    "L",
+    "XL",
     "28",
     "30",
     "32",
@@ -120,6 +149,9 @@ export const SIZES = [
 
 // ---------------------------------------------------------------------------
 // PRODUCT NAMES
+//
+// Combo products are intentionally NOT added to mock products here.
+// Actual Combo products can be created through the Admin Product Form.
 // ---------------------------------------------------------------------------
 
 const names = {
@@ -254,6 +286,9 @@ const makeProduct = (
 
 // ---------------------------------------------------------------------------
 // PRODUCTS
+//
+// Existing mock products remain unchanged.
+// Combo products will be created from Admin Product Form.
 // ---------------------------------------------------------------------------
 
 export const PRODUCTS = [

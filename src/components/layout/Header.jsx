@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: "All Collection", to: "/collection" },
   { label: "New Arrivals", to: "/new-arrivals" },
   { label: "Offer Product", to: "/offers" },
+  { label: "Combo", to: "/combo" },
   { label: "Shirts", to: "/shirts" },
   { label: "Tees", to: "/tees" },
   { label: "Pants", to: "/pants" },
@@ -166,15 +167,7 @@ export default function Header() {
 
             {/* ==================================================
                 CENTER LOGO IMAGE
-
-                IMPORTANT:
-                Put your logo at:
-
-                public/logo.png
-
-                Same logo for mobile + laptop.
-                No shop name.
-            =================================================== */}
+            ================================================== */}
 
             <Link
               to="/"
@@ -212,7 +205,7 @@ export default function Header() {
                 SEARCH
                 RIGHT CORNER
                 MOBILE + LAPTOP
-            =================================================== */}
+            ================================================== */}
 
             <div
               ref={wrapRef}
@@ -314,7 +307,7 @@ export default function Header() {
 
           {/* ==================================================
               DESKTOP NAVIGATION
-          =================================================== */}
+          ================================================== */}
 
           <div
             className="

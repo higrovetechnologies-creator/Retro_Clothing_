@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Link,
-  useParams,
-} from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import {
   motion,
@@ -22,9 +19,7 @@ import {
   useSettings,
 } from "../hooks/useStore";
 
-import {
-  whatsappOrderUrl,
-} from "../lib/whatsapp";
+import { whatsappOrderUrl } from "../lib/whatsapp";
 
 import {
   EmptyState,
@@ -42,6 +37,33 @@ import {
 
 import { CATEGORY_SIZES } from "../lib/data";
 
+/* ============================================================
+   COMBO SIZE CONFIGURATION
+============================================================ */
+
+const COMBO_SHIRT_SIZES = [
+  "M",
+  "L",
+  "XL",
+];
+
+const COMBO_PANT_SIZES = [
+  "28",
+  "30",
+  "32",
+  "34",
+  "36",
+];
+
+const COMBO_SIZES = [
+  ...COMBO_SHIRT_SIZES,
+  ...COMBO_PANT_SIZES,
+];
+
+/* ============================================================
+   COMPONENT
+============================================================ */
+
 export default function ProductDetail() {
   const { slug } = useParams();
 
@@ -52,24 +74,39 @@ export default function ProductDetail() {
     (p) => p.slug === slug
   );
 
+  /* ============================================================
+     NORMAL PRODUCT SIZE
+  ============================================================ */
+
+  const [size, setSize] = useState(null);
+
+  /* ============================================================
+     COMBO PRODUCT SIZES
+  ============================================================ */
+
+  const [shirtSize, setShirtSize] =
+    useState(null);
+
+  const [pantSize, setPantSize] =
+    useState(null);
+
+  /* ============================================================
+     IMAGE
+  ============================================================ */
+
   const [activeImage, setActiveImage] =
     useState(0);
 
-  const [size, setSize] =
-    useState(null);
+  /* ============================================================
+     POPUP
+  ============================================================ */
 
   const [showSizePopup, setShowSizePopup] =
     useState(false);
 
   /*
-   * Popup type:
-   *
-   * "size"
-   * -> User clicked Order without selecting size
-   *
-   * "out_of_stock"
-   * -> User clicked a size which
-   *    admin has not marked as available
+   * size
+   * out_of_stock
    */
   const [popupType, setPopupType] =
     useState("size");
@@ -82,8 +119,14 @@ export default function ProductDetail() {
     window.scrollTo(0, 0);
 
     setActiveImage(0);
+
     setSize(null);
+
+    setShirtSize(null);
+    setPantSize(null);
+
     setShowSizePopup(false);
+
     setPopupType("size");
   }, [slug]);
 
@@ -94,17 +137,15 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="mx-auto max-w-2xl px-4 pb-24 pt-40 sm:px-8">
-
         <EmptyState
           title="Product not found"
           message="This product may have been removed or the link is incorrect."
           actionLabel="Back to Collection"
-          onAction={() =>
-            (window.location.href =
-              "/collection")
-          }
+          onAction={() => {
+            window.location.href =
+              "/collection";
+          }}
         />
-
       </div>
     );
   }
@@ -118,24 +159,25 @@ export default function ProductDetail() {
     "out_of_stock";
 
   /* ============================================================
-     ALL SIZES
-     
-     Show every size belonging to the product category.
-     
-     Example:
-     Shirts -> M, L, XL
-     Pants  -> 28, 30, 32, 34, 36
+     COMBO
   ============================================================ */
 
-  const allSizes =
-    CATEGORY_SIZES[
-      product.category
-    ] || [];
+  const isCombo =
+    String(product.category || "")
+      .toLowerCase() === "combo";
 
   /* ============================================================
-     AVAILABLE SIZES
-     
-     These are the sizes selected by Admin.
+     ALL SIZES
+  ============================================================ */
+
+  const allSizes = isCombo
+    ? COMBO_SIZES
+    : CATEGORY_SIZES[
+        product.category
+      ] || [];
+
+  /* ============================================================
+     ADMIN AVAILABLE SIZES
   ============================================================ */
 
   const availableSizes =
@@ -144,7 +186,35 @@ export default function ProductDetail() {
       : [];
 
   /* ============================================================
-     RELATED
+     COMBO AVAILABLE SHIRT SIZES
+  ============================================================ */
+
+  const availableShirtSizes =
+    isCombo
+      ? availableSizes.filter(
+          (item) =>
+            COMBO_SHIRT_SIZES.includes(
+              item
+            )
+        )
+      : [];
+
+  /* ============================================================
+     COMBO AVAILABLE PANT SIZES
+  ============================================================ */
+
+  const availablePantSizes =
+    isCombo
+      ? availableSizes.filter(
+          (item) =>
+            COMBO_PANT_SIZES.includes(
+              item
+            )
+        )
+      : [];
+
+  /* ============================================================
+     RELATED PRODUCTS
   ============================================================ */
 
   const related = products
@@ -157,7 +227,7 @@ export default function ProductDetail() {
     .slice(0, 4);
 
   /* ============================================================
-     FABRIC
+     PRODUCT DETAILS
   ============================================================ */
 
   const hasFabricInfo =
@@ -166,15 +236,47 @@ export default function ProductDetail() {
     product.occasion;
 
   /* ============================================================
-     ORDER
+     WHATSAPP ORDER SIZE
+  ============================================================ */
+
+  const selectedOrderSize = isCombo
+    ? shirtSize && pantSize
+      ? `Shirt Size: ${shirtSize}, Pant Size: ${pantSize}`
+      : ""
+    : size || "";
+
+  /* ============================================================
+     ORDER HANDLER
   ============================================================ */
 
   const onOrder = (e) => {
+    /*
+     * Product unavailable
+     */
     if (!isInStock) {
       e.preventDefault();
       return;
     }
 
+    /*
+     * Combo product
+     */
+    if (isCombo) {
+      if (!shirtSize || !pantSize) {
+        e.preventDefault();
+
+        setPopupType("size");
+        setShowSizePopup(true);
+
+        return;
+      }
+
+      return;
+    }
+
+    /*
+     * Normal product
+     */
     if (!size) {
       e.preventDefault();
 
@@ -186,10 +288,10 @@ export default function ProductDetail() {
   };
 
   /* ============================================================
-     CHOOSE SIZE
+     SCROLL TO SIZE SELECTOR
   ============================================================ */
 
-  const chooseSize = () => {
+  const scrollToSizeSelector = () => {
     setShowSizePopup(false);
 
     setTimeout(() => {
@@ -208,34 +310,120 @@ export default function ProductDetail() {
   };
 
   /* ============================================================
-     CHOOSE ANOTHER SIZE
+     SELECT NORMAL SIZE
   ============================================================ */
 
-  const chooseAnotherSize = () => {
+  const handleNormalSizeSelect = (
+    selected
+  ) => {
+    if (!isInStock) return;
+
+    const isSizeAvailable =
+      availableSizes.includes(
+        selected
+      );
+
+    /*
+     * Admin hasn't enabled this size.
+     */
+    if (!isSizeAvailable) {
+      setPopupType(
+        "out_of_stock"
+      );
+
+      setShowSizePopup(true);
+
+      return;
+    }
+
+    setSize(selected);
+
     setShowSizePopup(false);
-
-    setTimeout(() => {
-      const sizeSection =
-        document.getElementById(
-          "product-size-selector"
-        );
-
-      if (sizeSection) {
-        sizeSection.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, 100);
   };
+
+  /* ============================================================
+     SELECT SHIRT SIZE
+  ============================================================ */
+
+  const handleShirtSizeSelect = (
+    selected
+  ) => {
+    if (!isInStock) return;
+
+    const isSizeAvailable =
+      availableShirtSizes.includes(
+        selected
+      );
+
+    /*
+     * Admin hasn't enabled this
+     * shirt size.
+     */
+    if (!isSizeAvailable) {
+      setPopupType(
+        "out_of_stock"
+      );
+
+      setShowSizePopup(true);
+
+      return;
+    }
+
+    setShirtSize(selected);
+
+    setShowSizePopup(false);
+  };
+
+  /* ============================================================
+     SELECT PANT SIZE
+  ============================================================ */
+
+  const handlePantSizeSelect = (
+    selected
+  ) => {
+    if (!isInStock) return;
+
+    const isSizeAvailable =
+      availablePantSizes.includes(
+        selected
+      );
+
+    /*
+     * Admin hasn't enabled this
+     * pant size.
+     */
+    if (!isSizeAvailable) {
+      setPopupType(
+        "out_of_stock"
+      );
+
+      setShowSizePopup(true);
+
+      return;
+    }
+
+    setPantSize(selected);
+
+    setShowSizePopup(false);
+  };
+
+  /* ============================================================
+     SEO
+  ============================================================ */
 
   const seoRoute = productRoute(product);
 
   return (
     <>
+      {/* ========================================================
+          SEO
+      ======================================================== */}
+
       <Seo
         title={seoRoute.title}
-        description={seoRoute.description}
+        description={
+          seoRoute.description
+        }
         path={seoRoute.path}
         image={seoRoute.image}
         type="product"
@@ -280,13 +468,13 @@ export default function ProductDetail() {
         </div>
 
         {/* ======================================================
-            PRODUCT
+            PRODUCT LAYOUT
         ====================================================== */}
 
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
 
           {/* ====================================================
-              IMAGES
+              PRODUCT IMAGES
           ==================================================== */}
 
           <div>
@@ -311,20 +499,19 @@ export default function ProductDetail() {
                 }
                 alt={`${product.name} – ${
                   product.colour || ""
-                } ${product.category}`.trim()}
-                className={`
-                  h-full
-                  w-full
-                  object-cover
-                  ${
-                    !isInStock
-                      ? "opacity-70"
-                      : ""
-                  }
-                `}
+                } ${
+                  product.category
+                }`.trim()}
+                className={`h-full w-full object-cover ${
+                  !isInStock
+                    ? "opacity-70"
+                    : ""
+                }`}
               />
 
             </div>
+
+            {/* Image thumbnails */}
 
             <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto">
 
@@ -342,18 +529,17 @@ export default function ProductDetail() {
                       )
                     }
                     className={`h-20 w-16 shrink-0 overflow-hidden rounded-xl border transition-colors ${
-                      activeImage === index
+                      activeImage ===
+                      index
                         ? "border-bone"
                         : "border-line"
                     }`}
                   >
-
                     <img
                       src={image}
                       alt=""
                       className="h-full w-full object-cover"
                     />
-
                   </button>
                 )
               )}
@@ -363,12 +549,12 @@ export default function ProductDetail() {
           </div>
 
           {/* ====================================================
-              DETAILS
+              PRODUCT DETAILS
           ==================================================== */}
 
           <div>
 
-            {/* OCCASION */}
+            {/* Occasion */}
 
             {product.occasion && (
               <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-mist">
@@ -376,13 +562,13 @@ export default function ProductDetail() {
               </p>
             )}
 
-            {/* NAME */}
+            {/* Product name */}
 
             <h1 className="mt-2 font-display text-[34px] leading-tight text-bone sm:text-[40px]">
               {product.name}
             </h1>
 
-            {/* PRICE */}
+            {/* Price */}
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
 
@@ -412,7 +598,7 @@ export default function ProductDetail() {
             </div>
 
             {/* ==================================================
-                STOCK STATUS
+                STOCK
             ================================================== */}
 
             <div className="mt-4">
@@ -441,7 +627,7 @@ export default function ProductDetail() {
 
             </div>
 
-            {/* DESCRIPTION */}
+            {/* Description */}
 
             {product.description && (
               <p className="mt-5 max-w-md text-[14px] leading-relaxed text-mist">
@@ -449,19 +635,21 @@ export default function ProductDetail() {
               </p>
             )}
 
-            {/* PRODUCT CODE */}
+            {/* Product code */}
 
             {product.product_code && (
               <p className="mt-3 text-xs text-mist">
                 Product Code:{" "}
                 <span className="text-bone/80">
-                  {product.product_code}
+                  {
+                    product.product_code
+                  }
                 </span>
               </p>
             )}
 
             {/* ==================================================
-                SIZE
+                SIZE SELECTOR
             ================================================== */}
 
             <div
@@ -469,115 +657,311 @@ export default function ProductDetail() {
               className="mt-7 scroll-mt-24"
             >
 
-              <div className="mb-3 flex items-center justify-between">
-
-                <p className="text-[11px] font-medium uppercase tracking-widest text-mist">
-                  Select Size
-                </p>
-
-                {size && (
-                  <p className="text-[11px] text-bone/80">
-                    Selected: {size}
-                  </p>
-                )}
-
-              </div>
-
               {/* ==================================================
-                  ALL CATEGORY SIZES
-                  
-                  Every applicable size is displayed.
-                  
-                  Admin-selected sizes:
-                  -> selectable
-                  
-                  Admin-not-selected sizes:
-                  -> shown but unavailable
-                  -> clicking opens Out of Stock popup
+                  COMBO
               ================================================== */}
 
-              <div className="flex flex-wrap gap-2.5">
+              {isCombo ? (
+                <div className="space-y-6">
 
-                {allSizes.map(
-                  (item) => {
+                  {/* Heading */}
 
-                    const isSizeAvailable =
-                      availableSizes.includes(
-                        item
-                      );
+                  <div className="mb-1">
 
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        disabled={!isInStock}
-                        onClick={() => {
+                    <p className="text-[11px] font-medium uppercase tracking-widest text-mist">
+                      Select Your Sizes
+                    </p>
 
-                          if (!isInStock)
-                            return;
+                    <p className="mt-1 text-[12px] text-mist/70">
+                      Choose one shirt size
+                      and one pant size.
+                    </p>
 
-                          /*
-                           * Size exists for category,
-                           * but Admin did not enable it.
-                           */
-                          if (
-                            !isSizeAvailable
-                          ) {
-                            setPopupType(
-                              "out_of_stock"
+                  </div>
+
+                  {/* =================================================
+                      SHIRT SIZE
+                  ================================================= */}
+
+                  <div>
+
+                    <div className="mb-3 flex items-center justify-between">
+
+                      <div>
+                        <p className="text-sm font-medium text-bone">
+                          Shirt Size
+                        </p>
+
+                        <p className="mt-1 text-[11px] text-mist">
+                          M / L / XL
+                        </p>
+                      </div>
+
+                      {shirtSize && (
+                        <span className="rounded-full bg-bone px-3 py-1 text-[10px] font-medium text-ink">
+                          Selected:{" "}
+                          {shirtSize}
+                        </span>
+                      )}
+
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+
+                      {COMBO_SHIRT_SIZES.map(
+                        (item) => {
+                          const isAvailable =
+                            availableShirtSizes.includes(
+                              item
                             );
 
-                            setShowSizePopup(
-                              true
-                            );
-
-                            return;
-                          }
-
-                          /*
-                           * Available size
-                           */
-                          setSize(item);
-
-                          setShowSizePopup(
-                            false
+                          return (
+                            <button
+                              key={item}
+                              type="button"
+                              disabled={
+                                !isInStock
+                              }
+                              onClick={() =>
+                                handleShirtSizeSelect(
+                                  item
+                                )
+                              }
+                              className={`flex h-11 min-w-12 items-center justify-center rounded-full border px-4 text-sm transition-all ${
+                                !isInStock
+                                  ? "cursor-not-allowed border-line text-mist/30"
+                                  : !isAvailable
+                                  ? "border-line text-mist/40 hover:border-red-500/40 hover:bg-red-500/5"
+                                  : shirtSize ===
+                                    item
+                                  ? "border-bone bg-bone text-ink"
+                                  : "border-line-strong text-bone hover:bg-white/5"
+                              }`}
+                            >
+                              {item}
+                            </button>
                           );
-                        }}
-                        className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-all ${
-                          !isInStock
-                            ? "cursor-not-allowed border-line text-mist/30"
-                            : !isSizeAvailable
-                            ? "border-line text-mist/40 hover:border-red-500/40 hover:bg-red-500/5"
-                            : size === item
-                            ? "border-bone bg-bone text-ink"
-                            : "border-line-strong text-bone hover:bg-white/5"
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    );
-                  }
-                )}
+                        }
+                      )}
 
-              </div>
+                    </div>
 
-              {!isInStock && (
-                <p className="mt-3 text-[12px] text-mist">
-                  This product is currently unavailable.
-                </p>
+                  </div>
+
+                  {/* Divider */}
+
+                  <div className="h-px bg-line" />
+
+                  {/* =================================================
+                      PANT SIZE
+                  ================================================= */}
+
+                  <div>
+
+                    <div className="mb-3 flex items-center justify-between">
+
+                      <div>
+
+                        <p className="text-sm font-medium text-bone">
+                          Pant Size
+                        </p>
+
+                        <p className="mt-1 text-[11px] text-mist">
+                          28 / 30 / 32 / 34 / 36
+                        </p>
+
+                      </div>
+
+                      {pantSize && (
+                        <span className="rounded-full bg-bone px-3 py-1 text-[10px] font-medium text-ink">
+                          Selected:{" "}
+                          {pantSize}
+                        </span>
+                      )}
+
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+
+                      {COMBO_PANT_SIZES.map(
+                        (item) => {
+                          const isAvailable =
+                            availablePantSizes.includes(
+                              item
+                            );
+
+                          return (
+                            <button
+                              key={item}
+                              type="button"
+                              disabled={
+                                !isInStock
+                              }
+                              onClick={() =>
+                                handlePantSizeSelect(
+                                  item
+                                )
+                              }
+                              className={`flex h-11 min-w-12 items-center justify-center rounded-full border px-4 text-sm transition-all ${
+                                !isInStock
+                                  ? "cursor-not-allowed border-line text-mist/30"
+                                  : !isAvailable
+                                  ? "border-line text-mist/40 hover:border-red-500/40 hover:bg-red-500/5"
+                                  : pantSize ===
+                                    item
+                                  ? "border-bone bg-bone text-ink"
+                                  : "border-line-strong text-bone hover:bg-white/5"
+                              }`}
+                            >
+                              {item}
+                            </button>
+                          );
+                        }
+                      )}
+
+                    </div>
+
+                  </div>
+
+                  {/* =================================================
+                      COMBO SUMMARY
+                  ================================================= */}
+
+                  <div className="rounded-2xl border border-line bg-charcoal/40 p-4">
+
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-mist">
+                      Your Selection
+                    </p>
+
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+
+                      <div className="rounded-xl border border-line bg-white/[0.02] p-3">
+
+                        <p className="text-[10px] uppercase tracking-wider text-mist">
+                          Shirt
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-bone">
+                          {shirtSize ||
+                            "Not selected"}
+                        </p>
+
+                      </div>
+
+                      <div className="rounded-xl border border-line bg-white/[0.02] p-3">
+
+                        <p className="text-[10px] uppercase tracking-wider text-mist">
+                          Pant
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-bone">
+                          {pantSize ||
+                            "Not selected"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* Combo warning */}
+
+                  {isInStock &&
+                    (!shirtSize ||
+                      !pantSize) && (
+                      <p className="text-[12px] text-mist">
+                        Select both sizes to
+                        continue with your
+                        WhatsApp order.
+                      </p>
+                    )}
+
+                </div>
+              ) : (
+                /* ==================================================
+                   NORMAL PRODUCT
+                ================================================== */
+
+                <>
+
+                  <div className="mb-3 flex items-center justify-between">
+
+                    <p className="text-[11px] font-medium uppercase tracking-widest text-mist">
+                      Select Size
+                    </p>
+
+                    {size && (
+                      <p className="text-[11px] text-bone/80">
+                        Selected:{" "}
+                        {size}
+                      </p>
+                    )}
+
+                  </div>
+
+                  <div className="flex flex-wrap gap-2.5">
+
+                    {allSizes.map(
+                      (item) => {
+
+                        const isSizeAvailable =
+                          availableSizes.includes(
+                            item
+                          );
+
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            disabled={
+                              !isInStock
+                            }
+                            onClick={() =>
+                              handleNormalSizeSelect(
+                                item
+                              )
+                            }
+                            className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-all ${
+                              !isInStock
+                                ? "cursor-not-allowed border-line text-mist/30"
+                                : !isSizeAvailable
+                                ? "border-line text-mist/40 hover:border-red-500/40 hover:bg-red-500/5"
+                                : size ===
+                                  item
+                                ? "border-bone bg-bone text-ink"
+                                : "border-line-strong text-bone hover:bg-white/5"
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        );
+                      }
+                    )}
+
+                  </div>
+
+                  {!isInStock && (
+                    <p className="mt-3 text-[12px] text-mist">
+                      This product is
+                      currently unavailable.
+                    </p>
+                  )}
+
+                </>
               )}
 
             </div>
 
             {/* ==================================================
-                ORDER BUTTON
+                WHATSAPP ORDER
             ================================================== */}
 
             {isInStock ? (
               <a
                 href={whatsappOrderUrl(
                   product,
-                  size,
+                  selectedOrderSize,
                   settings.whatsapp
                 )}
                 onClick={onOrder}
@@ -585,14 +969,12 @@ export default function ProductDetail() {
                 rel="noreferrer"
                 className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-full bg-bone py-4 text-xs font-semibold uppercase tracking-[0.2em] text-ink transition-transform active:scale-[0.98] sm:w-auto sm:px-10"
               >
-
                 <MessageCircle
                   size={16}
                   strokeWidth={2}
                 />
 
                 Order on WhatsApp
-
               </a>
             ) : (
               <button
@@ -630,14 +1012,15 @@ export default function ProductDetail() {
                   className="shrink-0 text-bone"
                 />
 
-                Cash on Delivery available only in Tirunelveli
+                Cash on Delivery available
+                only in Tirunelveli
 
               </span>
 
             </div>
 
             {/* ==================================================
-                FABRIC
+                FABRIC & DETAILS
             ================================================== */}
 
             {hasFabricInfo && (
@@ -691,7 +1074,7 @@ export default function ProductDetail() {
             )}
 
             {/* ==================================================
-                CARE
+                CARE INSTRUCTIONS
             ================================================== */}
 
             {product.care_instruction && (
@@ -702,7 +1085,9 @@ export default function ProductDetail() {
                 </p>
 
                 <p className="text-[13px] leading-relaxed text-mist">
-                  {product.care_instruction}
+                  {
+                    product.care_instruction
+                  }
                 </p>
 
               </div>
@@ -713,7 +1098,7 @@ export default function ProductDetail() {
         </div>
 
         {/* ======================================================
-            RELATED
+            RELATED PRODUCTS
         ====================================================== */}
 
         {related.length > 0 && (
@@ -743,7 +1128,7 @@ export default function ProductDetail() {
       </div>
 
       {/* ========================================================
-          SIZE / OUT OF STOCK POPUP
+          SIZE POPUP
       ======================================================== */}
 
       <AnimatePresence>
@@ -796,7 +1181,7 @@ export default function ProductDetail() {
               className="relative w-full max-w-[390px] rounded-[24px] border border-white/10 bg-[#17171a] p-6 text-center shadow-2xl sm:p-7"
             >
 
-              {/* CLOSE */}
+              {/* Close */}
 
               <button
                 type="button"
@@ -804,52 +1189,56 @@ export default function ProductDetail() {
                   setShowSizePopup(false)
                 }
                 className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-mist transition-colors hover:bg-white/10 hover:text-bone"
+                aria-label="Close"
               >
                 <X size={17} />
               </button>
 
-              {/* ICON */}
+              {/* Icon */}
 
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5">
+
                 <span className="text-xl">
                   {popupType ===
                   "out_of_stock"
                     ? "❌"
                     : "👕"}
                 </span>
+
               </div>
 
-              {/* TITLE */}
+              {/* Title */}
 
               <h3 className="mt-5 font-display text-2xl text-bone">
 
                 {popupType ===
                 "out_of_stock"
                   ? "Size Out of Stock"
+                  : isCombo
+                  ? "Select Your Sizes"
                   : "Select Your Size"}
 
               </h3>
 
-              {/* DESCRIPTION */}
+              {/* Description */}
 
               <p className="mx-auto mt-2 max-w-[290px] text-[13px] leading-relaxed text-mist">
 
                 {popupType ===
                 "out_of_stock"
                   ? "This size is currently unavailable. Please choose another available size."
+                  : isCombo
+                  ? "Please select both a shirt size and a pant size before placing the order."
                   : "Please select your size before placing the order."}
 
               </p>
 
-              {/* ACTION */}
+              {/* Action */}
 
               <button
                 type="button"
                 onClick={
-                  popupType ===
-                  "out_of_stock"
-                    ? chooseAnotherSize
-                    : chooseSize
+                  scrollToSizeSelector
                 }
                 className="mt-6 w-full rounded-full bg-bone px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition-transform active:scale-[0.98]"
               >
@@ -857,6 +1246,8 @@ export default function ProductDetail() {
                 {popupType ===
                 "out_of_stock"
                   ? "Choose Another Size"
+                  : isCombo
+                  ? "Choose Sizes"
                   : "Choose Size"}
 
               </button>

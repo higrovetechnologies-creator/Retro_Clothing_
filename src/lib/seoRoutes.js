@@ -8,119 +8,303 @@
 
 import { CATEGORIES } from "./data.js";
 
+/* ===========================================================================
+   CATEGORY LABELS
+
+   IMPORTANT:
+   Combo is intentionally NOT added to CATEGORIES because Combo is a
+   dedicated product category/page and should not appear in the normal
+   visual category cards.
+=========================================================================== */
+
 export const CATEGORY_LABELS = CATEGORIES.reduce((acc, c) => {
   acc[c.slug] = c.label;
   return acc;
 }, {});
 
+/* ===========================================================================
+   STATIC ROUTES
+=========================================================================== */
+
 export const STATIC_ROUTES = [
+  /* -------------------------------------------------------------------------
+     HOME
+  ------------------------------------------------------------------------- */
   {
     path: "/",
-    title: "Retro Clothing Tirunelveli | Trendy Fashion & Streetwear",
+    title:
+      "Retro Clothing Tirunelveli | Trendy Fashion & Streetwear",
     description:
-      "Shop Retro Clothing in Tirunelveli for shirts, T-shirts, oversized tees, pants, casual wear and streetwear. Order online and across India.",
+      "Shop Retro Clothing in Tirunelveli for shirts, T-shirts, oversized tees, pants, combo sets, casual wear and streetwear. Order online and across India.",
     changefreq: "daily",
     priority: 1.0,
-    breadcrumbs: [{ name: "Home", path: "/" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     ALL COLLECTION
+  ------------------------------------------------------------------------- */
   {
     path: "/collection",
-    title: "Clothing Collection Tirunelveli | Retro Clothing",
+    title:
+      "Clothing Collection Tirunelveli | Retro Clothing",
     description:
-      "Browse the Retro Clothing collection of shirts, T-shirts, oversized tees and pants from our Tirunelveli fashion store, with shipping across India.",
+      "Browse the Retro Clothing collection of shirts, T-shirts, oversized tees, pants and combo sets from our Tirunelveli fashion store, with shipping across India.",
     changefreq: "daily",
     priority: 0.8,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "All Collection", path: "/collection" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "All Collection",
+        path: "/collection",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     NEW ARRIVALS
+  ------------------------------------------------------------------------- */
   {
     path: "/new-arrivals",
-    title: "New Arrivals | Retro Clothing Tirunelveli",
+    title:
+      "New Arrivals | Retro Clothing Tirunelveli",
     description:
-      "Explore new-arrival shirts, T-shirts and pants from Retro Clothing, a Tirunelveli fashion brand shipping across India.",
+      "Explore new-arrival shirts, T-shirts, pants and latest combo styles from Retro Clothing, a Tirunelveli fashion brand shipping across India.",
     changefreq: "daily",
     priority: 0.7,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "New Arrivals", path: "/new-arrivals" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "New Arrivals",
+        path: "/new-arrivals",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     OFFERS
+  ------------------------------------------------------------------------- */
   {
     path: "/offers",
-    title: "Clothing Offers | Retro Clothing Tirunelveli",
+    title:
+      "Clothing Offers | Retro Clothing Tirunelveli",
     description:
-      "Shop current offers on Retro Clothing shirts, T-shirts and pants from our Tirunelveli clothing store, while available stock lasts.",
+      "Shop current offers on Retro Clothing shirts, T-shirts, pants and combo products from our Tirunelveli clothing store, while available stock lasts.",
     changefreq: "daily",
     priority: 0.7,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Offer Products", path: "/offers" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Offer Products",
+        path: "/offers",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     COMBO
+
+     IMPORTANT:
+     Combo is NOT part of CATEGORIES.
+     It has its own dedicated route and SEO metadata.
+  ------------------------------------------------------------------------- */
+  {
+    path: "/combo",
+    title:
+      "Combo Clothing Sets Tirunelveli | Retro Clothing",
+    description:
+      "Shop combo clothing sets in Tirunelveli from Retro Clothing. Choose shirt and pant sizes separately and order stylish complete looks across India.",
+    changefreq: "weekly",
+    priority: 0.8,
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Combo",
+        path: "/combo",
+      },
+    ],
+  },
+
+  /* -------------------------------------------------------------------------
+     SHIRTS
+  ------------------------------------------------------------------------- */
   {
     path: "/shirts",
-    title: "Shirts Shop Tirunelveli | Trendy & Casual Shirts",
+    title:
+      "Shirts Shop Tirunelveli | Trendy & Casual Shirts",
     description:
       "Shop shirts in Tirunelveli, including camp collars, overshirts and flannels from Retro Clothing for everyday, casual and evening wear.",
     changefreq: "weekly",
     priority: 0.8,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Shirts", path: "/shirts" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Shirts",
+        path: "/shirts",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     TEES
+  ------------------------------------------------------------------------- */
   {
     path: "/tees",
-    title: "T-Shirts & Oversized Tees Tirunelveli | Retro Clothing",
+    title:
+      "T-Shirts & Oversized Tees Tirunelveli | Retro Clothing",
     description:
       "Shop T-shirts and oversized tees in Tirunelveli, including graphic, boxy and heavyweight styles from Retro Clothing.",
     changefreq: "weekly",
     priority: 0.8,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Tees", path: "/tees" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Tees",
+        path: "/tees",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     PANTS
+  ------------------------------------------------------------------------- */
   {
     path: "/pants",
-    title: "Pants & Trousers Tirunelveli | Retro Clothing",
+    title:
+      "Pants & Trousers Tirunelveli | Retro Clothing",
     description:
       "Shop pants and trousers in Tirunelveli, including cargo, pleated, straight and tapered styles from Retro Clothing.",
     changefreq: "weekly",
     priority: 0.8,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Pants", path: "/pants" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Pants",
+        path: "/pants",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     OUR STORY
+  ------------------------------------------------------------------------- */
   {
     path: "/our-story",
-    title: "Our Story | Retro Clothing Tirunelveli",
+    title:
+      "Our Story | Retro Clothing Tirunelveli",
     description:
       "Learn the Retro Clothing story, from a pop-up cart on Mela Mount Road in Tirunelveli to a local fashion label shipping across India.",
     changefreq: "monthly",
     priority: 0.5,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Our Story", path: "/our-story" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Our Story",
+        path: "/our-story",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     CONTACT
+  ------------------------------------------------------------------------- */
   {
     path: "/contact",
-    title: "Contact Retro Clothing | Tirunelveli",
+    title:
+      "Contact Retro Clothing | Tirunelveli",
     description:
       "Contact Retro Clothing in Tirunelveli for store details, orders and enquiries by phone, WhatsApp or email.",
     changefreq: "monthly",
     priority: 0.5,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }],
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Contact",
+        path: "/contact",
+      },
+    ],
   },
+
+  /* -------------------------------------------------------------------------
+     TIRUNELVELI
+  ------------------------------------------------------------------------- */
   {
     path: "/tirunelveli",
-    title: "Retro Clothing Tirunelveli | Clothing & Fashion Store",
+    title:
+      "Retro Clothing Tirunelveli | Clothing & Fashion Store",
     description:
-      "Visit Retro Clothing in Tirunelveli for shirts, T-shirts, oversized tees and pants. Find our Mela Mount Road store and shop online across India.",
+      "Visit Retro Clothing in Tirunelveli for shirts, T-shirts, oversized tees, pants and combo sets. Find our Mela Mount Road store and shop online across India.",
     changefreq: "monthly",
     priority: 0.9,
-    breadcrumbs: [{ name: "Home", path: "/" }, { name: "Tirunelveli", path: "/tirunelveli" }],
+
+    breadcrumbs: [
+      {
+        name: "Home",
+        path: "/",
+      },
+      {
+        name: "Tirunelveli",
+        path: "/tirunelveli",
+      },
+    ],
+
     faqs: [
       {
-        question: "Where can I find Retro Clothing in Tirunelveli?",
+        question:
+          "Where can I find Retro Clothing in Tirunelveli?",
         answer:
           "Retro Clothing is based on Mela Mount Road, Rajiv Gandhi Nagar, Valukodai, Tirunelveli, Tamil Nadu – 627006.",
       },
+
       {
-        question: "What type of clothing does Retro Clothing offer?",
+        question:
+          "What type of clothing does Retro Clothing offer?",
         answer:
-          "Retro Clothing sells shirts, tees and pants, designed and hand-checked at the Tirunelveli workshop.",
+          "Retro Clothing sells shirts, tees, pants and combo clothing sets, designed and hand-checked at the Tirunelveli workshop.",
       },
+
       {
-        question: "Can I shop for Retro Clothing online?",
+        question:
+          "Can I shop for Retro Clothing online?",
         answer:
           "Yes. Browse the collection online and order directly through the website's available ordering flow, with Cash on Delivery where offered.",
       },
+
       {
-        question: "Does Retro Clothing ship outside Tirunelveli?",
+        question:
+          "Does Retro Clothing ship outside Tirunelveli?",
         answer:
           "Yes. Retro Clothing ships across India, with orders dispatched from Tirunelveli within 24 hours according to the site's delivery information.",
       },
@@ -128,30 +312,110 @@ export const STATIC_ROUTES = [
   },
 ];
 
+/* ===========================================================================
+   PRODUCT ROUTE
+=========================================================================== */
+
 export function productRoute(product) {
-  const categoryLabel = CATEGORY_LABELS[product.category] || product.category || "Collection";
-  const categoryPath = CATEGORY_LABELS[product.category] ? `/${product.category}` : "/collection";
+  /* -------------------------------------------------------------------------
+     CATEGORY LABEL
+
+     Combo is handled separately because it intentionally does not exist
+     inside CATEGORIES.
+  ------------------------------------------------------------------------- */
+
+  const categoryLabel =
+    product.category === "combo"
+      ? "Combo"
+      : CATEGORY_LABELS[product.category] ||
+        product.category ||
+        "Collection";
+
+  /* -------------------------------------------------------------------------
+     CATEGORY PATH
+
+     Combo -> /combo
+
+     Normal categories:
+       shirts -> /shirts
+       tees   -> /tees
+       pants  -> /pants
+
+     Unknown category -> /collection
+  ------------------------------------------------------------------------- */
+
+  const categoryPath =
+    product.category === "combo"
+      ? "/combo"
+      : CATEGORY_LABELS[product.category]
+        ? `/${product.category}`
+        : "/collection";
+
+  /* -------------------------------------------------------------------------
+     PRODUCT DESCRIPTION
+  ------------------------------------------------------------------------- */
+
   const description = [
     `Shop ${product.name} from Retro Clothing in Tirunelveli.`,
-    product.description || `${categoryLabel} from the Retro Clothing collection.`,
+    product.description ||
+      `${categoryLabel} from the Retro Clothing collection.`,
   ]
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 
+  /* -------------------------------------------------------------------------
+     RETURN SEO ROUTE
+  ------------------------------------------------------------------------- */
+
   return {
     path: `/product/${product.slug}`,
-    title: `${product.name} | Retro Clothing Tirunelveli`,
-    description: description.length > 160 ? `${description.slice(0, 157).trimEnd()}...` : description,
+
+    title:
+      `${product.name} | Retro Clothing Tirunelveli`,
+
+    description:
+      description.length > 160
+        ? `${description
+            .slice(0, 157)
+            .trimEnd()}...`
+        : description,
+
     image: product.images?.[0],
+
     changefreq: "weekly",
+
     priority: 0.6,
-    lastmod: product.updated_at || product.created_at,
+
+    lastmod:
+      product.updated_at ||
+      product.created_at,
+
+    /* -----------------------------------------------------------------------
+       BREADCRUMBS
+    ----------------------------------------------------------------------- */
+
     breadcrumbs: [
-      { name: "Home", path: "/" },
-      { name: categoryLabel, path: categoryPath },
-      { name: product.name, path: `/product/${product.slug}` },
+      {
+        name: "Home",
+        path: "/",
+      },
+
+      {
+        name: categoryLabel,
+        path: categoryPath,
+      },
+
+      {
+        name: product.name,
+        path: `/product/${product.slug}`,
+      },
     ],
+
+    /* -----------------------------------------------------------------------
+       PRODUCT DATA
+    ----------------------------------------------------------------------- */
+
     product,
   };
 }

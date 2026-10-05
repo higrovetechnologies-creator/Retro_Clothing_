@@ -56,9 +56,9 @@ export default function Home() {
 
   /* ============================================================
      SORT HELPER
-
+     
      NEWEST FIRST
-
+     
      Priority:
      1. created_at
      2. createdAt
@@ -93,14 +93,6 @@ export default function Home() {
 
   /* ============================================================
      ANNOUNCEMENTS
-
-     Whatever exists in the database is shown.
-     
-     - Delete old announcement from Admin
-       -> disappears from User Home.
-     
-     - Add new announcement from Admin
-       -> appears automatically here.
   ============================================================ */
 
   const sortedAnnouncements =
@@ -120,8 +112,26 @@ export default function Home() {
 
   const newArrivals = newestFirst(
     (products || []).filter(
+      (p) => p.is_new_arrival
+    )
+  );
+
+  /*
+   * COMBO PRODUCTS
+   *
+   * Combo is intentionally NOT part of CATEGORIES.
+   *
+   * Products with:
+   *
+   * category === "combo"
+   *
+   * automatically appear in this section.
+   */
+  const comboProducts = newestFirst(
+    (products || []).filter(
       (p) =>
-        p.is_new_arrival
+        String(p?.category || "")
+          .toLowerCase() === "combo"
     )
   );
 
@@ -156,13 +166,9 @@ export default function Home() {
 
       {/* ======================================================
           ANNOUNCEMENTS
-
-          Empty -> section won't render.
-          New announcement -> automatically renders.
       ======================================================= */}
 
-      {sortedAnnouncements.length >
-        0 && (
+      {sortedAnnouncements.length > 0 && (
         <AnnouncementSection
           announcements={
             sortedAnnouncements
@@ -172,6 +178,13 @@ export default function Home() {
 
       {/* ======================================================
           OFFER PRODUCTS
+          
+          FLOW:
+          Offer Products
+          ↓
+          New Arrivals
+          ↓
+          Combo
       ======================================================= */}
 
       {offers.length > 0 && (
@@ -247,7 +260,60 @@ export default function Home() {
       )}
 
       {/* ======================================================
+          COMBO PRODUCTS
+          
+          FINAL HOME FLOW:
+          
+          Offer Products
+                  ↓
+          New Arrivals
+                  ↓
+              Combo
+                  ↓
+          Shop by Category
+          
+          Combo is NOT included in CATEGORIES.
+      ======================================================= */}
+
+      {comboProducts.length > 0 && (
+        <section className="mx-auto max-w-[1400px] px-4 py-14 sm:px-8">
+          <SectionHeading
+            eyebrow="Complete The Look"
+            title="Combo"
+            action={
+              <Link
+                to="/combo"
+                className="hidden items-center gap-1.5 text-xs uppercase tracking-widest text-mist transition-colors hover:text-bone sm:flex"
+              >
+                View all
+                <ArrowRight size={13} />
+              </Link>
+            }
+          />
+
+          <HorizontalScroller>
+            {comboProducts.map(
+              (p, i) => (
+                <div
+                  key={p.id}
+                  className="w-[62%] shrink-0 snap-start sm:w-[28%] lg:w-[22%]"
+                >
+                  <ProductCard
+                    product={p}
+                    index={i}
+                  />
+                </div>
+              )
+            )}
+          </HorizontalScroller>
+        </section>
+      )}
+
+      {/* ======================================================
           SHOP BY CATEGORY
+          
+          IMPORTANT:
+          Combo is intentionally NOT included here.
       ======================================================= */}
 
       <section className="mx-auto max-w-[1400px] px-4 py-14 sm:px-8">
@@ -260,12 +326,8 @@ export default function Home() {
           {CATEGORIES.map(
             (category) => (
               <CategoryCard
-                key={
-                  category.slug
-                }
-                category={
-                  category
-                }
+                key={category.slug}
+                category={category}
               />
             )
           )}
@@ -316,45 +378,32 @@ export default function Home() {
             }`}
             aria-label="Customer reviews"
             onPointerDown={() =>
-              setReviewsPaused(
-                true
-              )
+              setReviewsPaused(true)
             }
             onPointerUp={() =>
-              setReviewsPaused(
-                false
-              )
+              setReviewsPaused(false)
             }
             onPointerCancel={() =>
-              setReviewsPaused(
-                false
-              )
+              setReviewsPaused(false)
             }
             onPointerLeave={() =>
-              setReviewsPaused(
-                false
-              )
+              setReviewsPaused(false)
             }
             onTouchStart={() =>
-              setReviewsPaused(
-                true
-              )
+              setReviewsPaused(true)
             }
             onTouchEnd={() =>
-              setReviewsPaused(
-                false
-              )
+              setReviewsPaused(false)
             }
           >
             <div className="reviews-marquee flex w-max gap-4">
+
               <div className="reviews-set flex shrink-0 gap-4">
                 {reviews.map(
                   (review) => (
                     <ReviewCard
                       key={`review-a-${review.id}`}
-                      review={
-                        review
-                      }
+                      review={review}
                     />
                   )
                 )}
@@ -368,13 +417,12 @@ export default function Home() {
                   (review) => (
                     <ReviewCard
                       key={`review-b-${review.id}`}
-                      review={
-                        review
-                      }
+                      review={review}
                     />
                   )
                 )}
               </div>
+
             </div>
           </div>
         </section>

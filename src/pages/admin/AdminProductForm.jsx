@@ -12,6 +12,29 @@ import { db } from "../../lib/store";
 import { CATEGORY_SIZES } from "../../lib/data";
 import { imageFileToDataUrl } from "../../lib/imageUpload";
 
+/* ============================================================
+   COMBO SIZES
+============================================================ */
+
+const COMBO_SHIRT_SIZES = ["M", "L", "XL"];
+
+const COMBO_PANT_SIZES = [
+  "28",
+  "30",
+  "32",
+  "34",
+  "36",
+];
+
+const COMBO_SIZES = [
+  ...COMBO_SHIRT_SIZES,
+  ...COMBO_PANT_SIZES,
+];
+
+/* ============================================================
+   EMPTY FORM
+============================================================ */
+
 const EMPTY = {
   name: "",
   description: "",
@@ -103,8 +126,14 @@ export default function AdminProductForm() {
     products,
   ]);
 
+  /* ============================================================
+     AVAILABLE SIZES
+  ============================================================ */
+
   const availableSizes =
-    CATEGORY_SIZES[form.category] || [];
+    form.category === "combo"
+      ? COMBO_SIZES
+      : CATEGORY_SIZES[form.category] || [];
 
   /* ============================================================
      CATEGORY
@@ -113,20 +142,50 @@ export default function AdminProductForm() {
   const changeCategory = (
     nextCategory
   ) => {
-    setForm((current) => ({
-      ...current,
+    setForm((current) => {
+      /*
+       * COMBO
+       *
+       * Combo has:
+       * Shirt -> M / L / XL
+       * Pant  -> 28 / 30 / 32 / 34 / 36
+       */
 
-      category: nextCategory,
+      if (nextCategory === "combo") {
+        return {
+          ...current,
+          category: nextCategory,
 
-      sizes: current.sizes.filter(
-        (size) =>
-          (
-            CATEGORY_SIZES[
-              nextCategory
-            ] || []
-          ).includes(size)
-      ),
-    }));
+          /*
+           * If existing sizes are already valid
+           * combo sizes, preserve them.
+           */
+          sizes: current.sizes.filter(
+            (size) =>
+              COMBO_SIZES.includes(size)
+          ),
+        };
+      }
+
+      /*
+       * NORMAL CATEGORIES
+       */
+
+      return {
+        ...current,
+
+        category: nextCategory,
+
+        sizes: current.sizes.filter(
+          (size) =>
+            (
+              CATEGORY_SIZES[
+                nextCategory
+              ] || []
+            ).includes(size)
+        ),
+      };
+    });
   };
 
   /* ============================================================
@@ -216,17 +275,55 @@ export default function AdminProductForm() {
 
     if (saving) return;
 
-    if (
-      !form.name.trim() ||
-      !form.now_price ||
-      form.images.length === 0 ||
-      form.sizes.length === 0
-    ) {
-      alert(
-        "Please fill in the product name, price, at least one image and one size."
-      );
+    /*
+     * COMBO VALIDATION
+     *
+     * Combo must have:
+     * - at least one shirt size
+     * - at least one pant size
+     */
 
-      return;
+    if (form.category === "combo") {
+      const hasShirtSize =
+        form.sizes.some((size) =>
+          COMBO_SHIRT_SIZES.includes(size)
+        );
+
+      const hasPantSize =
+        form.sizes.some((size) =>
+          COMBO_PANT_SIZES.includes(size)
+        );
+
+      if (
+        !form.name.trim() ||
+        !form.now_price ||
+        form.images.length === 0 ||
+        !hasShirtSize ||
+        !hasPantSize
+      ) {
+        alert(
+          "For Combo products, please select at least one shirt size and one pant size."
+        );
+
+        return;
+      }
+    } else {
+      /*
+       * NORMAL PRODUCT VALIDATION
+       */
+
+      if (
+        !form.name.trim() ||
+        !form.now_price ||
+        form.images.length === 0 ||
+        form.sizes.length === 0
+      ) {
+        alert(
+          "Please fill in the product name, price, at least one image and one size."
+        );
+
+        return;
+      }
     }
 
     setSaving(true);
@@ -238,6 +335,16 @@ export default function AdminProductForm() {
         id: editing
           ? id
           : undefined,
+
+        /*
+         * Explicitly preserve combo sizes
+         */
+        sizes:
+          form.category === "combo"
+            ? form.sizes.filter((size) =>
+                COMBO_SIZES.includes(size)
+              )
+            : form.sizes,
 
         was_price:
           form.was_price
@@ -331,7 +438,9 @@ export default function AdminProductForm() {
           className="mt-8 space-y-8"
         >
 
-          {/* BASIC INFORMATION */}
+          {/* ==================================================
+              BASIC INFORMATION
+          ================================================== */}
 
           <FormSection
             title="Basic Information"
@@ -378,7 +487,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* PRICING */}
+          {/* ==================================================
+              PRICING
+          ================================================== */}
 
           <FormSection
             title="Pricing"
@@ -420,7 +531,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* STOCK STATUS */}
+          {/* ==================================================
+              STOCK STATUS
+          ================================================== */}
 
           <FormSection
             title="Stock Status"
@@ -531,7 +644,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* CATEGORY */}
+          {/* ==================================================
+              CATEGORY
+          ================================================== */}
 
           <FormSection
             title="Category"
@@ -543,6 +658,7 @@ export default function AdminProductForm() {
                 "shirts",
                 "tees",
                 "pants",
+                "combo",
               ].map(
                 (category) => (
                   <button
@@ -560,7 +676,10 @@ export default function AdminProductForm() {
                         : "border-line-strong text-bone hover:bg-white/5"
                     }`}
                   >
-                    {category}
+                    {category ===
+                    "combo"
+                      ? "Combo"
+                      : category}
                   </button>
                 )
               )}
@@ -569,46 +688,214 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* SIZES */}
+          {/* ==================================================
+              SIZES
+          ================================================== */}
 
           <FormSection
-            title="Sizes"
+            title={
+              form.category === "combo"
+                ? "Combo Sizes"
+                : "Sizes"
+            }
+            hint={
+              form.category === "combo"
+                ? "Select at least one shirt size and one pant size for this combo."
+                : undefined
+            }
           >
 
-            <div className="flex flex-wrap gap-2">
+            {/* ==================================================
+                COMBO SIZE UI
+            ================================================== */}
 
-              {availableSizes.length >
-              0 ? (
-                availableSizes.map(
-                  (size) => (
-                    <button
-                      type="button"
-                      key={size}
-                      onClick={() =>
-                        toggleSize(
-                          size
+            {form.category ===
+            "combo" ? (
+              <div className="space-y-6">
+
+                {/* SHIRT SIZES */}
+
+                <div>
+
+                  <div className="mb-3 flex items-center justify-between">
+
+                    <div>
+                      <p className="text-sm font-medium text-bone">
+                        Shirt Size
+                      </p>
+
+                      <p className="mt-1 text-[11px] text-mist">
+                        Select available shirt sizes
+                      </p>
+                    </div>
+
+                    <span className="rounded-full border border-line-strong px-3 py-1 text-[10px] uppercase tracking-wider text-mist">
+                      M / L / XL
+                    </span>
+
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+
+                    {COMBO_SHIRT_SIZES.map(
+                      (size) => (
+                        <button
+                          type="button"
+                          key={size}
+                          onClick={() =>
+                            toggleSize(
+                              size
+                            )
+                          }
+                          className={`flex h-11 min-w-12 items-center justify-center rounded-full border px-4 text-xs font-medium transition-all ${
+                            form.sizes.includes(
+                              size
+                            )
+                              ? "border-bone bg-bone text-ink"
+                              : "border-line-strong text-bone hover:bg-white/5"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+                {/* DIVIDER */}
+
+                <div className="h-px bg-line" />
+
+                {/* PANT SIZES */}
+
+                <div>
+
+                  <div className="mb-3 flex items-center justify-between">
+
+                    <div>
+                      <p className="text-sm font-medium text-bone">
+                        Pant Size
+                      </p>
+
+                      <p className="mt-1 text-[11px] text-mist">
+                        Select available pant sizes
+                      </p>
+                    </div>
+
+                    <span className="rounded-full border border-line-strong px-3 py-1 text-[10px] uppercase tracking-wider text-mist">
+                      28 - 36
+                    </span>
+
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+
+                    {COMBO_PANT_SIZES.map(
+                      (size) => (
+                        <button
+                          type="button"
+                          key={size}
+                          onClick={() =>
+                            toggleSize(
+                              size
+                            )
+                          }
+                          className={`flex h-11 min-w-12 items-center justify-center rounded-full border px-4 text-xs font-medium transition-all ${
+                            form.sizes.includes(
+                              size
+                            )
+                              ? "border-bone bg-bone text-ink"
+                              : "border-line-strong text-bone hover:bg-white/5"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+                {/* SELECTED SUMMARY */}
+
+                <div className="rounded-2xl border border-line bg-charcoal/30 p-4">
+
+                  <p className="text-[10px] uppercase tracking-widest text-mist">
+                    Selected Sizes
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+
+                    {form.sizes.length >
+                    0 ? (
+                      form.sizes.map(
+                        (size) => (
+                          <span
+                            key={size}
+                            className="rounded-full bg-bone px-3 py-1.5 text-[11px] font-medium text-ink"
+                          >
+                            {COMBO_SHIRT_SIZES.includes(
+                              size
+                            )
+                              ? `Shirt ${size}`
+                              : `Pant ${size}`}
+                          </span>
                         )
-                      }
-                      className={`h-10 w-10 rounded-full border text-xs transition-colors ${
-                        form.sizes.includes(
-                          size
-                        )
-                          ? "border-bone bg-bone text-ink"
-                          : "border-line-strong text-bone hover:bg-white/5"
-                      }`}
-                    >
-                      {size}
-                    </button>
+                      )
+                    ) : (
+                      <span className="text-xs text-mist">
+                        No sizes selected
+                      </span>
+                    )}
+
+                  </div>
+
+                </div>
+
+              </div>
+            ) : (
+              /* ==================================================
+                 NORMAL SIZE UI
+              ================================================== */
+
+              <div className="flex flex-wrap gap-2">
+
+                {availableSizes.length >
+                0 ? (
+                  availableSizes.map(
+                    (size) => (
+                      <button
+                        type="button"
+                        key={size}
+                        onClick={() =>
+                          toggleSize(
+                            size
+                          )
+                        }
+                        className={`h-10 w-10 rounded-full border text-xs transition-colors ${
+                          form.sizes.includes(
+                            size
+                          )
+                            ? "border-bone bg-bone text-ink"
+                            : "border-line-strong text-bone hover:bg-white/5"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
                   )
-                )
-              ) : (
-                <p className="text-xs text-mist">
-                  No sizes available
-                  for this category.
-                </p>
-              )}
+                ) : (
+                  <p className="text-xs text-mist">
+                    No sizes available
+                    for this category.
+                  </p>
+                )}
 
-            </div>
+              </div>
+            )}
 
           </FormSection>
 
@@ -717,7 +1004,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* OPTIONAL DETAILS */}
+          {/* ==================================================
+              OPTIONAL DETAILS
+          ================================================== */}
 
           <FormSection
             title="Optional Details"
@@ -768,7 +1057,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* CARE INSTRUCTIONS */}
+          {/* ==================================================
+              CARE INSTRUCTIONS
+          ================================================== */}
 
           <FormSection
             title="Care Instructions"
@@ -791,7 +1082,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* DISPLAY OPTIONS */}
+          {/* ==================================================
+              DISPLAY OPTIONS
+          ================================================== */}
 
           <FormSection
             title="Display Options"
@@ -839,7 +1132,9 @@ export default function AdminProductForm() {
 
           </FormSection>
 
-          {/* ACTION BUTTONS */}
+          {/* ==================================================
+              ACTION BUTTONS
+          ================================================== */}
 
           <div className="flex gap-3 pt-2">
 
